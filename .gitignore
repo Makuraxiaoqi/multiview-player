@@ -1,0 +1,10 @@
+node_modules/
+dist/
+vibe_images/
+dev/media/
+dev/debug*.mjs
+dev/shots/debug*
+dev/shots/fail-state.png
+*.log
+Thumbs.db
+.DS_Store
