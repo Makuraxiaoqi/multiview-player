@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file: data: blob:; img-src 'self' file: data: blob:; media-src 'self' file: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiview 多窗播放器</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="brand-copy">
+          <div class="brand-name">MULTIVIEW</div>
+          <div class="brand-sub">多窗播放器</div>
+        </div>
+        <button class="icon-btn" id="collapseBtn" data-icon="chevronLeft" data-size="15" title="收起文件浏览器" aria-label="收起文件浏览器"></button>
+      </div>
+
+      <div class="browser">
+        <div class="browser-nav">
+          <button class="icon-btn" data-nav="back" data-icon="chevronLeft" data-size="15" title="后退" aria-label="后退"></button>
+          <button class="icon-btn" data-nav="forward" data-icon="chevronRight" data-size="15" title="前进" aria-label="前进"></button>
+          <button class="icon-btn" data-nav="up" data-icon="chevronUp" data-size="15" title="上一级" aria-label="上一级"></button>
+          <button class="icon-btn" data-nav="refresh" data-icon="refresh" data-size="15" title="刷新" aria-label="刷新"></button>
+          <span class="nav-gap"></span>
+          <button class="icon-btn" id="openLocation" data-icon="folder" data-size="15" title="打开文件夹…" aria-label="打开文件夹"></button>
+        </div>
+
+        <div class="path-bar" id="pathBar" aria-label="当前路径"></div>
+        <div class="quick" id="quickPlaces"></div>
+
+        <div class="search-wrap">
+          <span class="search-ic" data-icon="search" data-size="14"></span>
+          <input type="search" id="searchInput" placeholder="筛选当前文件夹…" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="segmented" id="typeFilter">
+          <button data-filter="all" class="active">全部</button>
+          <button data-filter="image">图片</button>
+          <button data-filter="video">视频</button>
+        </div>
+
+        <div class="list-head"><span>媒体文件</span><span id="browserMeta"></span></div>
+        <div class="filelist" id="fileList"></div>
+
+        <div class="browser-actions">
+          <button class="btn primary" id="loadSelected" disabled>载入到当前窗口</button>
+          <button class="btn ghost" id="folderSlideshow">当前文件夹幻灯片</button>
+        </div>
+      </div>
+    </aside>
+
+    <button class="icon-btn sidebar-expand" id="expandBtn" data-icon="chevronRight" data-size="16" title="展开文件浏览器" aria-label="展开文件浏览器"></button>
+
+    <section class="workspace">
+      <header class="toolbar">
+        <div class="toolbar-row preset-row">
+          <span class="toolbar-tag">窗口预设</span>
+          <div class="preset-strip" id="presetStrip"></div>
+          <button class="btn ghost workspace-btn" id="workspacePresetBtn" title="工作区预设：保存 / 载入布局与媒体">
+            <span class="ws-label">工作区</span>
+          </button>
+          <div class="toolbar-spacer"></div>
+          <button class="btn play-all" id="playAllBtn" title="播放所有窗口（空格）"></button>
+          <button class="icon-btn" id="helpBtn" data-icon="help" data-size="17" title="快捷键与说明" aria-label="快捷键与说明"></button>
+        </div>
+
+        <div class="toolbar-row master-row">
+          <span class="master-tag">总进度</span>
+          <input type="range" class="range master-range" id="masterSeek" min="0" max="1000" value="0" step="1" disabled aria-label="所有窗口进度">
+          <span class="mono master-time" id="masterTime">--:-- / --:--</span>
+          <span class="v-divider"></span>
+          <button class="icon-btn" id="masterMuteBtn" title="总静音（M）" aria-label="总静音"></button>
+          <input type="range" class="range vol-range" id="masterVolume" min="0" max="100" value="80" step="1" aria-label="总音量">
+          <span class="mono vol-label" id="masterVolLabel">80%</span>
+          <span class="v-divider"></span>
+          <span class="master-tag slide-tag">幻灯片速度</span>
+          <div class="stepper">
+            <button class="step-btn" id="slideMinus" data-icon="minus" data-size="13" title="减少 0.1 秒（Shift 为 1 秒）" aria-label="减慢幻灯片"></button>
+            <input type="number" id="slideSeconds" min="0.1" max="60" step="0.1" value="3.0" aria-label="幻灯片每张秒数">
+            <span class="unit">秒 / 张</span>
+            <button class="step-btn" id="slidePlus" data-icon="plus" data-size="13" title="增加 0.1 秒（Shift 为 1 秒）" aria-label="加快幻灯片"></button>
+          </div>
+        </div>
+      </header>
+
+      <main class="stage" id="stage">
+        <div class="grid" id="grid"></div>
+      </main>
+
+      <footer class="statusbar">
+        <div class="status-left">
+          <span class="status-led"></span>
+          <span id="statusText">就绪</span>
+        </div>
+        <div class="status-right">
+          <span id="statusCounts"></span>
+          <span class="status-hint">双击画面全屏 · 空格统一播放 · Ctrl+Tab 切换窗口</span>
+        </div>
+      </footer>
+    </section>
+  </div>
+
+  <div class="popover-layer" id="popoverLayer"></div>
+  <div class="toast-layer" id="toastLayer"></div>
+
+  <script src="util.js"></script>
+  <script src="icons.js"></script>
+  <script src="layouts.js"></script>
+  <script src="pane.js"></script>
+  <script src="browser.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "multiview-player",
+  "productName": "Multiview 多窗播放器",
+  "version": "1.0.0",
+  "description": "多窗图片 / 视频同步播放器，带文件夹幻灯片与统一控制",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "pack": "electron-packager . Multiview --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon.ico --app-copyright=\"Multiview Player\" --ignore=\"^/(dev|vibe_images|dist)($|/)\""
+  },
+  "author": "Makura",
+  "license": "MIT",
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^45.3.0",
+    "playwright-core": "^1.65.0"
+  }
+}
